@@ -19,11 +19,6 @@ export const Crowdfund = () => {
   const [amount, setAmount] = useState<string>("10");
   const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
   const [txError, setTxError] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     setMounted(true);
