@@ -7,11 +7,11 @@ import { Coins, Loader2, AlertCircle } from "lucide-react";
 import { StellarWalletsKit } from "@creit.tech/stellar-wallets-kit/sdk";
 
 // For a real project, this would be the address of your deployed contract
-const CONTRACT_ID = "CBCNH4V3YBJCA6GIMZ7X24NE3536MW2DF74Y5DNUUXLZQEKDPUTH2IV6"; 
+const DEFAULT_CONTRACT_ID = "CBCNH4V3YBJCA6GIMZ7X24NE3536MW2DF74Y5DNUUXLZQEKDPUTH2IV6"; 
 const NETWORK_URL = "https://soroban-testnet.stellar.org";
 const NETWORK_PASSPHRASE = StellarSdk.Networks.TESTNET;
 
-export const Crowdfund = () => {
+export const Crowdfund = ({ contractId = DEFAULT_CONTRACT_ID }: { contractId?: string }) => {
   const [mounted, setMounted] = useState(false);
   const { address, connect, error: walletError } = useWallet();
   const [targetAmount, setTargetAmount] = useState<number>(1000);
@@ -64,7 +64,7 @@ export const Crowdfund = () => {
         .addOperation(StellarSdk.Operation.invokeHostFunction({
           func: StellarSdk.xdr.HostFunction.hostFunctionTypeInvokeContract(
             new StellarSdk.xdr.InvokeContractArgs({
-              contractAddress: StellarSdk.Address.fromString(CONTRACT_ID).toScAddress(),
+              contractAddress: StellarSdk.Address.fromString(contractId).toScAddress(),
               functionName: "pledge",
               args: [
                 new StellarSdk.Address(address).toScVal(),

@@ -1,4 +1,4 @@
-import { Crowdfund } from "@/components/Crowdfund";
+import { CrowdfundRoleManager } from "@/components/CrowdfundRoleManager";
 import { WalletProvider } from "@/components/WalletProvider";
 
 export default function Home() {
@@ -19,7 +19,7 @@ export default function Home() {
             </p>
           </div>
           
-          <Crowdfund />
+          <CrowdfundRoleManager />
         </div>
       </main>
     </WalletProvider>
