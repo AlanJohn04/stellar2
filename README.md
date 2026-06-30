@@ -44,4 +44,7 @@ screenshot:
 <img width="771" height="127" alt="Screenshot 2026-06-30 122402" src="https://github.com/user-attachments/assets/1039b977-7e07-49e7-9b6a-566a1b917d21" />
 <img width="766" height="167" alt="Screenshot 2026-06-30 130747" src="https://github.com/user-attachments/assets/e8762441-c972-47ed-9449-682496107043" />
 <img width="772" height="501" alt="Screenshot 2026-06-30 131357" src="https://github.com/user-attachments/assets/157d33e6-6e09-4f14-a625-ba3a1d65a8ca" />
+<img width="387" height="647" alt="Screenshot 2026-06-30 133144" src="https://github.com/user-attachments/assets/3eea0937-e3d9-4a8b-ad8c-eb5fbdb747c6" />
+<img width="690" height="566" alt="Screenshot 2026-06-30 133158" src="https://github.com/user-attachments/assets/e1c32835-4d70-4af4-a2a0-9afc2927c19c" />
+<img width="773" height="777" alt="Screenshot 2026-06-30 133123" src="https://github.com/user-attachments/assets/bfc9924c-6457-4388-97c4-2f8071525556" />
 
