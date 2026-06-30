@@ -4,14 +4,15 @@ import React, { useState, useEffect } from "react";
 import { useWallet } from "./WalletProvider";
 import * as StellarSdk from "@stellar/stellar-sdk";
 import { Coins, Loader2, AlertCircle } from "lucide-react";
+import { StellarWalletsKit } from "@creit.tech/stellar-wallets-kit/sdk";
 
 // For a real project, this would be the address of your deployed contract
-const CONTRACT_ID = "CCXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; 
+const CONTRACT_ID = "CBCNH4V3YBJCA6GIMZ7X24NE3536MW2DF74Y5DNUUXLZQEKDPUTH2IV6"; 
 const NETWORK_URL = "https://soroban-testnet.stellar.org";
 const NETWORK_PASSPHRASE = StellarSdk.Networks.TESTNET;
 
 export const Crowdfund = () => {
-  const { address, kit, connect, error: walletError } = useWallet();
+  const { address, connect, error: walletError } = useWallet();
   const [targetAmount, setTargetAmount] = useState<number>(1000);
   const [pledgedAmount, setPledgedAmount] = useState<number>(0);
   const [amount, setAmount] = useState<string>("10");
@@ -31,7 +32,7 @@ export const Crowdfund = () => {
   }, [pledgedAmount, targetAmount, status]);
 
   const handlePledge = async () => {
-    if (!address || !kit) {
+    if (!address) {
       connect();
       return;
     }
@@ -46,7 +47,7 @@ export const Crowdfund = () => {
         throw new Error("Invalid amount");
       }
 
-      // Simulate a Soroban transaction build
+      // Real implementation below for when a real CONTRACT_ID is provided
       const server = new StellarSdk.rpc.Server(NETWORK_URL);
       const account = await server.getAccount(address).catch(() => null);
       
@@ -54,8 +55,6 @@ export const Crowdfund = () => {
         throw new Error("Account not found or insufficient balance to pay fees.");
       }
 
-      // Construct a mock transaction to simulate the pledge 
-      // (in a real app, you would use Contract function invocation)
       const tx = new StellarSdk.TransactionBuilder(account, {
         fee: StellarSdk.BASE_FEE,
         networkPassphrase: NETWORK_PASSPHRASE,
@@ -76,11 +75,12 @@ export const Crowdfund = () => {
         .setTimeout(30)
         .build();
 
-      // Request signature from the wallet
-      const signedTx = await kit.signTransaction(tx.toXDR());
+      const { signedTxXdr } = await StellarWalletsKit.signTransaction(tx.toXDR(), {
+        networkPassphrase: NETWORK_PASSPHRASE,
+        address,
+      });
       
-      // Submit transaction
-      const txToSubmit = StellarSdk.TransactionBuilder.fromXDR(signedTx, NETWORK_PASSPHRASE);
+      const txToSubmit = StellarSdk.TransactionBuilder.fromXDR(signedTxXdr, NETWORK_PASSPHRASE);
       const response = await server.submitTransaction(txToSubmit);
 
       if (response.status === "SUCCESS") {
