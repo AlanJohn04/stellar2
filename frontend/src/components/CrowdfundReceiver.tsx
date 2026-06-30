@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import QRCode from "react-qr-code";
 import { Coins } from "lucide-react";
 
-const CONTRACT_ID = "CBCNH4V3YBJCA6GIMZ7X24NE3536MW2DF74Y5DNUUXLZQEKDPUTH2IV6";
+const CONTRACT_ID = "CBYUIHHL3T4XDLIJL2PB56ZQOSYOYQVYRUN5WRLA6R7JK2ELDN74BUCC";
 
 export const CrowdfundReceiver = ({ onBack }: { onBack: () => void }) => {
   const [mounted, setMounted] = useState(false);

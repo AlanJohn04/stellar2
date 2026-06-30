@@ -7,7 +7,7 @@ import { Coins, Loader2, AlertCircle } from "lucide-react";
 import { StellarWalletsKit } from "@creit.tech/stellar-wallets-kit/sdk";
 
 // For a real project, this would be the address of your deployed contract
-const DEFAULT_CONTRACT_ID = "CBCNH4V3YBJCA6GIMZ7X24NE3536MW2DF74Y5DNUUXLZQEKDPUTH2IV6"; 
+const DEFAULT_CONTRACT_ID = "CBYUIHHL3T4XDLIJL2PB56ZQOSYOYQVYRUN5WRLA6R7JK2ELDN74BUCC"; 
 const NETWORK_URL = "https://soroban-testnet.stellar.org";
 const NETWORK_PASSPHRASE = StellarSdk.Networks.TESTNET;
 
