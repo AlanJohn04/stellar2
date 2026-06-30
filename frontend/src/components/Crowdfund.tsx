@@ -18,6 +18,11 @@ export const Crowdfund = () => {
   const [amount, setAmount] = useState<string>("10");
   const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
   const [txError, setTxError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     // In a real scenario, you'd fetch the contract state here using StellarSdk.rpc.Server
@@ -81,13 +86,26 @@ export const Crowdfund = () => {
       });
       
       const txToSubmit = StellarSdk.TransactionBuilder.fromXDR(signedTxXdr, NETWORK_PASSPHRASE);
-      const response = await server.submitTransaction(txToSubmit);
+      
+      const response = await server.sendTransaction(txToSubmit);
 
-      if (response.status === "SUCCESS") {
-        setStatus("success");
-        setPledgedAmount(p => p + pledgeVal);
+      if (response.status === "PENDING") {
+        let txStatus;
+        // Poll for success
+        for (let i = 0; i < 15; i++) {
+          await new Promise(r => setTimeout(r, 2000));
+          txStatus = await server.getTransaction(response.hash);
+          if (txStatus.status !== "NOT_FOUND") break;
+        }
+
+        if (txStatus && txStatus.status === "SUCCESS") {
+          setStatus("success");
+          setPledgedAmount(p => p + pledgeVal);
+        } else {
+          throw new Error("Transaction failed or timed out on network.");
+        }
       } else {
-        throw new Error("Transaction failed on network.");
+        throw new Error("Transaction rejected by network.");
       }
     } catch (err: any) {
       console.error(err);
@@ -111,14 +129,15 @@ export const Crowdfund = () => {
           <Coins className="text-blue-400" />
           Web3 Funding
         </h2>
-        {address ? (
+        {mounted && address ? (
           <div className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium border border-blue-500/30">
             {address.slice(0, 4)}...{address.slice(-4)}
           </div>
         ) : (
           <button 
             onClick={connect}
-            className="px-6 py-2 bg-white text-black font-semibold rounded-full hover:bg-gray-200 transition-colors"
+            disabled={!mounted}
+            className="px-6 py-2 bg-white text-black font-semibold rounded-full hover:bg-gray-200 transition-colors disabled:opacity-50"
           >
             Connect Wallet
           </button>
@@ -164,7 +183,7 @@ export const Crowdfund = () => {
         </div>
         <button
           onClick={handlePledge}
-          disabled={status === "pending" || !address}
+          disabled={!mounted || status === "pending" || !address}
           className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {status === "pending" ? (
