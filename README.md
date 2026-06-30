@@ -5,7 +5,7 @@ FutureTwin Funding is a decentralized crowdfunding application built on the Stel
 It features a dual-role QR code system that allows campaign creators to generate QR codes containing their contract ID, and pledgers to scan and seamlessly send XLM to the campaign.
 
 ## 🚀 Live Demo
-[*(Optional: Add your Vercel or Netlify link here if you deploy it)*
+[* Vercel or Netlify link here *
 ](https://stellar2-nine.vercel.app/)
 
 ## 🔗 Contract Details
