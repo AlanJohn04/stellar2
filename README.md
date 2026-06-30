@@ -36,3 +36,12 @@ You can verify our successful smart contract pledge interaction on the Stellar E
 3. Install dependencies: `npm install`
 4. Start the development server: `npm run dev`
 5. Open [http://localhost:3000](http://localhost:3000) (or 3001) in your browser.
+
+
+screenshot:
+
+<img width="766" height="167" alt="Screenshot 2026-06-30 130747" src="https://github.com/user-attachments/assets/e77ba49f-8c7e-4154-b2ea-d17d48ad8ca3" />
+<img width="771" height="127" alt="Screenshot 2026-06-30 122402" src="https://github.com/user-attachments/assets/1039b977-7e07-49e7-9b6a-566a1b917d21" />
+<img width="766" height="167" alt="Screenshot 2026-06-30 130747" src="https://github.com/user-attachments/assets/e8762441-c972-47ed-9449-682496107043" />
+<img width="772" height="501" alt="Screenshot 2026-06-30 131357" src="https://github.com/user-attachments/assets/157d33e6-6e09-4f14-a625-ba3a1d65a8ca" />
+
