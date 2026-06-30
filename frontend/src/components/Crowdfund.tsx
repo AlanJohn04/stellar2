@@ -5,6 +5,7 @@ import { useWallet } from "./WalletProvider";
 import * as StellarSdk from "@stellar/stellar-sdk";
 import { Coins, Loader2, AlertCircle } from "lucide-react";
 import { StellarWalletsKit } from "@creit.tech/stellar-wallets-kit/sdk";
+import { fetchContractStatus } from "../utils/contract";
 
 // For a real project, this would be the address of your deployed contract
 const DEFAULT_CONTRACT_ID = "CBYUIHHL3T4XDLIJL2PB56ZQOSYOYQVYRUN5WRLA6R7JK2ELDN74BUCC"; 
@@ -22,16 +23,19 @@ export const Crowdfund = ({ contractId = DEFAULT_CONTRACT_ID }: { contractId?: s
 
   useEffect(() => {
     setMounted(true);
-    // In a real scenario, you'd fetch the contract state here using StellarSdk.rpc.Server
-    // For now, we mock the real-time progress update
-    const interval = setInterval(() => {
-      // Mock progress
-      if (pledgedAmount < targetAmount && status !== "pending") {
-         // setPledgedAmount(p => Math.min(p + 10, targetAmount));
+
+    const updateStatus = async () => {
+      const statusData = await fetchContractStatus(contractId, NETWORK_URL, NETWORK_PASSPHRASE);
+      if (statusData) {
+        setTargetAmount(statusData.targetAmount);
+        setPledgedAmount(statusData.pledgedAmount);
       }
-    }, 5000);
+    };
+
+    updateStatus();
+    const interval = setInterval(updateStatus, 5000);
     return () => clearInterval(interval);
-  }, [pledgedAmount, targetAmount, status]);
+  }, [contractId]);
 
   const handlePledge = async () => {
     if (!address) {
@@ -77,6 +81,13 @@ export const Crowdfund = ({ contractId = DEFAULT_CONTRACT_ID }: { contractId?: s
         .setTimeout(30)
         .build();
 
+      const simulation = await server.simulateTransaction(tx);
+      if (StellarSdk.rpc.Api.isSimulationError(simulation)) {
+        throw new Error("Transaction simulation failed. Contract may not be initialized or input is invalid.");
+      }
+      
+      tx = StellarSdk.rpc.assembleTransaction(tx, NETWORK_PASSPHRASE, simulation).build();
+
       const { signedTxXdr } = await StellarWalletsKit.signTransaction(tx.toXDR(), {
         networkPassphrase: NETWORK_PASSPHRASE,
         address,
@@ -84,23 +95,25 @@ export const Crowdfund = ({ contractId = DEFAULT_CONTRACT_ID }: { contractId?: s
       
       const txToSubmit = StellarSdk.TransactionBuilder.fromXDR(signedTxXdr, NETWORK_PASSPHRASE);
       
-      try {
-        const response = await server.sendTransaction(txToSubmit);
-        if (response.status === "PENDING") {
-          let txStatus;
-          for (let i = 0; i < 5; i++) {
-            await new Promise(r => setTimeout(r, 2000));
-            txStatus = await server.getTransaction(response.hash);
-            if (txStatus.status !== "NOT_FOUND") break;
-          }
-        }
-      } catch (e) {
-        console.warn("Network submission failed, likely because the contract is not initialized or lacks footprint.", e);
-      }
+      const response = await server.sendTransaction(txToSubmit);
 
-      // We bypass the network rejection to ensure the UI flow completes successfully for the demo
-      setStatus("success");
-      setPledgedAmount(p => p + pledgeVal);
+      if (response.status === "PENDING") {
+        let txStatus;
+        for (let i = 0; i < 15; i++) {
+          await new Promise(r => setTimeout(r, 2000));
+          txStatus = await server.getTransaction(response.hash);
+          if (txStatus.status !== "NOT_FOUND") break;
+        }
+
+        if (txStatus && txStatus.status === "SUCCESS") {
+          setStatus("success");
+          setPledgedAmount(p => p + pledgeVal);
+        } else {
+          throw new Error("Transaction failed or timed out on network.");
+        }
+      } else {
+        throw new Error("Transaction rejected by network.");
+      }
     } catch (err: any) {
       console.error(err);
       setStatus("error");

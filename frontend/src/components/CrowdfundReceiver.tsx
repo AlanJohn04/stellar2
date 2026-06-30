@@ -3,8 +3,12 @@
 import React, { useState, useEffect } from "react";
 import QRCode from "react-qr-code";
 import { Coins } from "lucide-react";
+import * as StellarSdk from "@stellar/stellar-sdk";
+import { fetchContractStatus } from "../utils/contract";
 
 const CONTRACT_ID = "CBYUIHHL3T4XDLIJL2PB56ZQOSYOYQVYRUN5WRLA6R7JK2ELDN74BUCC";
+const NETWORK_URL = "https://soroban-testnet.stellar.org";
+const NETWORK_PASSPHRASE = StellarSdk.Networks.TESTNET;
 
 export const CrowdfundReceiver = ({ onBack }: { onBack: () => void }) => {
   const [mounted, setMounted] = useState(false);
@@ -13,21 +17,19 @@ export const CrowdfundReceiver = ({ onBack }: { onBack: () => void }) => {
 
   useEffect(() => {
     setMounted(true);
-    // Real implementation would fetch contract state using StellarSdk.rpc.Server
-    // For demo purposes, we will mock receiving funds
-    const interval = setInterval(() => {
-      setPledgedAmount(p => {
-        if (p < targetAmount) {
-          // Slowly mock receiving pledges over time randomly if needed, 
-          // or just stay static until a pledge happens on the other device 
-          // (mocking real-time WebSocket/Polling)
-          return p; 
-        }
-        return p;
-      });
-    }, 5000);
+
+    const updateStatus = async () => {
+      const status = await fetchContractStatus(CONTRACT_ID, NETWORK_URL, NETWORK_PASSPHRASE);
+      if (status) {
+        setTargetAmount(status.targetAmount);
+        setPledgedAmount(status.pledgedAmount);
+      }
+    };
+
+    updateStatus();
+    const interval = setInterval(updateStatus, 5000);
     return () => clearInterval(interval);
-  }, [targetAmount]);
+  }, []);
 
   if (!mounted) return null;
 
