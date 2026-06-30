@@ -12,6 +12,7 @@ const NETWORK_URL = "https://soroban-testnet.stellar.org";
 const NETWORK_PASSPHRASE = StellarSdk.Networks.TESTNET;
 
 export const Crowdfund = () => {
+  const [mounted, setMounted] = useState(false);
   const { address, connect, error: walletError } = useWallet();
   const [targetAmount, setTargetAmount] = useState<number>(1000);
   const [pledgedAmount, setPledgedAmount] = useState<number>(0);
@@ -25,6 +26,7 @@ export const Crowdfund = () => {
   }, []);
 
   useEffect(() => {
+    setMounted(true);
     // In a real scenario, you'd fetch the contract state here using StellarSdk.rpc.Server
     // For now, we mock the real-time progress update
     const interval = setInterval(() => {
@@ -60,7 +62,7 @@ export const Crowdfund = () => {
         throw new Error("Account not found or insufficient balance to pay fees.");
       }
 
-      const tx = new StellarSdk.TransactionBuilder(account, {
+      let tx = new StellarSdk.TransactionBuilder(account, {
         fee: StellarSdk.BASE_FEE,
         networkPassphrase: NETWORK_PASSPHRASE,
       })
@@ -79,6 +81,15 @@ export const Crowdfund = () => {
         }))
         .setTimeout(30)
         .build();
+
+      // Simulate the transaction to calculate footprint and fees
+      const simulation = await server.simulateTransaction(tx);
+      if (StellarSdk.rpc.Api.isSimulationError(simulation)) {
+        throw new Error("Transaction simulation failed. Check contract state and inputs.");
+      }
+      
+      // Assemble the final transaction with the simulated data
+      tx = StellarSdk.rpc.assembleTransaction(tx, NETWORK_PASSPHRASE, simulation).build();
 
       const { signedTxXdr } = await StellarWalletsKit.signTransaction(tx.toXDR(), {
         networkPassphrase: NETWORK_PASSPHRASE,
@@ -121,6 +132,10 @@ export const Crowdfund = () => {
   };
 
   const progress = Math.min((pledgedAmount / targetAmount) * 100, 100);
+
+  if (!mounted) {
+    return null; // Avoid hydration mismatch by waiting for client mount
+  }
 
   return (
     <div className="w-full max-w-xl mx-auto bg-gray-900/50 backdrop-blur-xl border border-gray-800 rounded-3xl p-8 shadow-2xl">
